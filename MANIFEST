@@ -1,0 +1,25 @@
+Build.PL
+Changes
+lib/WebService/ReutersConnect.pm
+lib/WebService/ReutersConnect/APIResponse.pm
+lib/WebService/ReutersConnect/Category.pm
+lib/WebService/ReutersConnect/Channel.pm
+lib/WebService/ReutersConnect/Item.pm
+lib/WebService/ReutersConnect/ResultSet.pm
+lib/WebService/ReutersConnect/XMLDocument.pm
+MANIFEST			This list of files
+README
+t/00-load.t
+t/01-login.t
+t/02-channels.t
+t/03-items.t
+t/04-packages.t
+t/05-search.t
+t/06-expire.t
+t/boilerplate.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
+Makefile.PL
+META.yml
+META.json
