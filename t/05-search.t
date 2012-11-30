@@ -7,6 +7,14 @@ use Log::Log4perl qw/:easy/;
 use DateTime;
 Log::Log4perl->easy_init($DEBUG);
 
+## Mockable UserAgent
+BEGIN{
+  $ENV{LWP_UA_MOCK} ||= 'playback';
+  $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
+}
+use LWP::UserAgent::Mockable;
+
+
 use WebService::ReutersConnect qw/:demo/;
 
 
@@ -57,7 +65,14 @@ map{ diag($_->description()) } @channels;
 }
 
 {
-  my $now = DateTime->now();
+  ## my $now = DateTime->now();
+  ## We use LWP::UserAgent::Mock. Responses are frozen in time
+  my $now = DateTime->new( year => 2012,
+                           month => 11,
+                           day => 29,
+                           hour => 12,
+                           minute => 6 );
+
   my $one_month_ago = $now->clone->subtract( months => 1 );
   ## Search some Pics about britain in the last 30 days (hopefully there will be at least one)
   my $res = $reuters->search({ media_types => [ 'P' , 'V' ],
@@ -83,4 +98,5 @@ map{ diag($_->description()) } @channels;
   dies_ok { $reuters->fetch_search({ sort => 'fjeijfiejf' }) } "Ok dies on bad sort";
 }
 
+LWP::UserAgent::Mockable->finished;
 done_testing();

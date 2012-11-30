@@ -3,6 +3,7 @@ abstract: 'Use the ReutersConnect API'
 author:
   - 'Jerome Eteve <jerome@eteve.net>'
 build_requires:
+  LWP::UserAgent::Mockable: 1.1
   Test::Fatal: 0.008
   Test::More: 0
 configure_requires:
@@ -17,7 +18,7 @@ name: WebService-ReutersConnect
 provides:
   WebService::ReutersConnect:
     file: lib/WebService/ReutersConnect.pm
-    version: 0.01
+    version: 0.02
   WebService::ReutersConnect::APIResponse:
     file: lib/WebService/ReutersConnect/APIResponse.pm
     version: 0
@@ -49,4 +50,4 @@ requires:
   perl: 5.006
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.01
+version: 0.02

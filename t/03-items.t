@@ -6,11 +6,20 @@ use Log::Log4perl qw/:easy/;
 use DateTime;
 Log::Log4perl->easy_init($DEBUG);
 
+## Mockable UserAgent
+BEGIN{
+  $ENV{LWP_UA_MOCK} ||= 'playback';
+  $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
+}
+use LWP::UserAgent::Mockable;
+
+
 use WebService::ReutersConnect qw/:demo/;
 
 
-ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_USERNAME} // REUTERS_DEMOUSER
-                                                     , password => $ENV{REUTERS_PASSWORD} // REUTERS_DEMOPASSWORD }), "Ok build a reuters");
+ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_USERNAME} // REUTERS_DEMOUSER,
+                                                     password => $ENV{REUTERS_PASSWORD} // REUTERS_DEMOPASSWORD,
+                                                   }), "Ok build a reuters");
 
 
 ## Get channels and fetch all items from the first one.
@@ -32,7 +41,13 @@ foreach my $item ( @items ){
   ## Test with a date_from
   my $channel = $channels[0];
   diag("Fetching items from channel ".$channel->alias().':'.$channel->description());
-  my $now = DateTime->now();
+  ## my $now = DateTime->now();
+  ## We use LWP::UserAgent::Mock. Responses are frozen in time
+  my $now = DateTime->new( year => 2012,
+                           month => 11,
+                           day => 29,
+                           hour => 12,
+                           minute => 6 );
   my $yesterday    = $now->clone->subtract( days => 1 );
   my $two_days_ago = $now->clone->subtract( days => 2 );
   my $three_days_ago = $now->clone->subtract( days => 3 );
@@ -69,4 +84,5 @@ foreach my $item ( @items ){
 
 }
 
+LWP::UserAgent::Mockable->finished;
 done_testing();

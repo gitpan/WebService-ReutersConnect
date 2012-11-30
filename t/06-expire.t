@@ -5,6 +5,14 @@ use Test::More ;
 use Log::Log4perl qw/:easy/;
 Log::Log4perl->easy_init($DEBUG);
 
+## Mockable UserAgent
+BEGIN{
+  $ENV{LWP_UA_MOCK} ||= 'playback';
+  $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
+}
+use LWP::UserAgent::Mockable;
+
+
 use WebService::ReutersConnect qw/:demo/;
 
 my $FRESH_TOKEN;
@@ -27,4 +35,6 @@ foreach my $item ( @items ){
 }
 
 cmp_ok( $FRESH_TOKEN , 'eq' , $reuters->authToken() , "Ok the callback has worked");
+
+LWP::UserAgent::Mockable->finished;
 done_testing();

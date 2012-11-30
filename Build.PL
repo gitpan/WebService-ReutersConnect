@@ -11,6 +11,7 @@ my $builder = Module::Build->new(
     build_requires => {
         'Test::More' => 0,
         'Test::Fatal' => 0.008,
+        'LWP::UserAgent::Mockable' => 1.10,
     },
     requires => {
         'perl' => 5.006,

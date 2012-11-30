@@ -24,7 +24,7 @@ use DateTime::Format::ISO8601;
 
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 ## Reuters stuff
 has 'login_entry_point' => ( is => 'ro' , isa => 'Str' , default => 'https://commerce.reuters.com/rmd/rest/xml/', required => 1 );
@@ -449,7 +449,7 @@ WebService::ReutersConnect - Use the ReutersConnect API
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -514,7 +514,7 @@ Here are some example of usage to get you started quickly:
   say("Size: ".$res->size());
   say("Num Found: ".$res->num_found());
   say("Start: ".$res->start());
-  foreach my $item ( @items ){
+  foreach my $item ( @{ $res->items() } ){
     say($item->headline());
   }
 

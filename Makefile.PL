@@ -11,6 +11,7 @@ WriteMakefile
                    'HTTP::Request' => '6',
                    'HTTP::Response' => '6.01',
                    'LWP::UserAgent' => '6.03',
+                   'LWP::UserAgent::Mockable' => '1.1',
                    'Log::Log4perl' => '1.29',
                    'Moose' => '2.0401',
                    'Test::Fatal' => '0.008',

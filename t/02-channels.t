@@ -5,11 +5,19 @@ use Test::More ;
 use Log::Log4perl qw/:easy/;
 Log::Log4perl->easy_init($DEBUG);
 
+## Mockable UserAgent
+BEGIN{
+  $ENV{LWP_UA_MOCK} ||= 'playback';
+  $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
+}
+use LWP::UserAgent::Mockable;
+
 use WebService::ReutersConnect qw/:demo/;
 
 
-ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_USERNAME} // REUTERS_DEMOUSER
-                                                     , password => $ENV{REUTERS_PASSWORD} // REUTERS_DEMOPASSWORD }), "Ok build a reuters");
+ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_USERNAME} // REUTERS_DEMOUSER,
+                                                     password => $ENV{REUTERS_PASSWORD} // REUTERS_DEMOPASSWORD,
+                                                   }), "Ok build a reuters");
 
 ## Try to get my channels
 ok( my @channels = $reuters->fetch_channels() );
@@ -51,5 +59,5 @@ foreach my $key ( keys %{$reuters->categories_idx()} ){
   cmp_ok( scalar( @cat_channels) , '<' , scalar(@channels) , "And we got less than the whole set of channels.");
 }
 
-
+LWP::UserAgent::Mockable->finished;
 done_testing();
