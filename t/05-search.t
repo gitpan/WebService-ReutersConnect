@@ -5,7 +5,7 @@ use Test::More ;
 use Test::Fatal qw/dies_ok lives_ok/;
 use Log::Log4perl qw/:easy/;
 use DateTime;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($ERROR);
 
 ## Mockable UserAgent
 BEGIN{
@@ -24,13 +24,13 @@ ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_US
 {
   ## General search
   ok( my @items = $reuters->fetch_search() , "Ok can fetch search without any params");
-  foreach my $item ( @items ){
-    diag($item->id().' - \''.$item->slug().'\' - '.$item->guid().' - '.$item->channel_alias());
-  }
+  # foreach my $item ( @items ){
+  #   diag($item->id().' - \''.$item->slug().'\' - '.$item->guid().' - '.$item->channel_alias());
+  # }
 }
 
 my @channels = $reuters->fetch_channels();
-map{ diag($_->description()) } @channels;
+## map{ diag($_->description()) } @channels;
 
 {
   ## Search on ONE channel.
@@ -85,13 +85,13 @@ map{ diag($_->description()) } @channels;
   ok( @items , "Ok got some results for Picture and Video media");
   ok( $res->size() , "There is a size");
   ok( $res->num_found() , "There is a num found");
-  diag("Size: ".$res->size());
-  diag("Num Found: ".$res->num_found());
-  diag("Start: ".$res->start());
-  foreach my $item ( @items ){
-    diag($item->headline());
-    diag($item->preview_url());
-  }
+  #diag("Size: ".$res->size());
+  #diag("Num Found: ".$res->num_found());
+  #diag("Start: ".$res->start());
+  # foreach my $item ( @items ){
+  #   diag($item->headline());
+  #   diag($item->preview_url());
+  # }
 }
 
 { ## Baaaaad sort

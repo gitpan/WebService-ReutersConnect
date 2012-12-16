@@ -1,5 +1,12 @@
 Revision history for WebService-ReutersConnect
 
+0.03   
+        - Requiring minimal perl 5.10.
+        - Added built-in Reuters data about Concepts (aka subjects).
+        - Added Convenience Methods To the WebService::ReutersConnect::XMLDocument
+        - Avoid warnings when Log4perl is not initialized
+        - Fixed some documentation
+
 0.02    30 Nov 2012
         - Made test independent from Reuters Servers using LWP::UserAgent::Mockable
         - Fixed some documentation

@@ -5,7 +5,7 @@ use Test::More ;
 use Test::Fatal qw(dies_ok lives_ok);
 use Log::Log4perl qw/:easy/;
 use DateTime;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($ERROR);
 
 ## Mockable UserAgent
 BEGIN{
@@ -39,7 +39,7 @@ foreach my $channel ( @channels ){
 ## Find channel which is online report.
 
 
-diag("Querying packages from channel ".$olr_channel->alias().":".$olr_channel->description());
+## diag("Querying packages from channel ".$olr_channel->alias().":".$olr_channel->description());
 {
 ##  local $TODO = "Wait until reuters makes a Online Report Channel available to test account";
   my @items = ();
@@ -110,13 +110,14 @@ my $breaking_news = undef;
 
 {
   ## Also test the OLR method.
-  diag("Querying Online Reports");
+  ## diag("Querying Online Reports");
   ## $reuters->debug(1);
   my @items = $reuters->fetch_olr();
   foreach my $item ( @items ){
-    diag("ITEM: ".$item->date_created().' : '.$item->headline());
+    ##diag("ITEM: ".$item->date_created().' : '.$item->headline());
     ok( $item->is_composite(), "Item is composite");
-    diag("Item is in channel ".$item->channel()->description());
+    ok( $item->channel() , "Ok cat get item channel");
+    ##diag("Item is in channel ".$item->channel()->description());
     ## $reuters->debug(1);
     #my $richer = $item->fetch_richer_me();
     #ok( $richer->is_composite() , "Richer is also composite");

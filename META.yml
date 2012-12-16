@@ -18,7 +18,7 @@ name: WebService-ReutersConnect
 provides:
   WebService::ReutersConnect:
     file: lib/WebService/ReutersConnect.pm
-    version: 0.02
+    version: 0.03
   WebService::ReutersConnect::APIResponse:
     file: lib/WebService/ReutersConnect/APIResponse.pm
     version: 0
@@ -27,6 +27,15 @@ provides:
     version: 0
   WebService::ReutersConnect::Channel:
     file: lib/WebService/ReutersConnect/Channel.pm
+    version: 0
+  WebService::ReutersConnect::DB:
+    file: lib/WebService/ReutersConnect/DB.pm
+    version: 0
+  WebService::ReutersConnect::DB::Result::Concept:
+    file: lib/WebService/ReutersConnect/DB/Result/Concept.pm
+    version: 0
+  WebService::ReutersConnect::DB::Result::ConceptAlias:
+    file: lib/WebService/ReutersConnect/DB/Result/ConceptAlias.pm
     version: 0
   WebService::ReutersConnect::Item:
     file: lib/WebService/ReutersConnect/Item.pm
@@ -38,8 +47,12 @@ provides:
     file: lib/WebService/ReutersConnect/XMLDocument.pm
     version: 0
 requires:
+  DBD::SQLite: 1.35
+  DBIx::Class: 0.08196
   DateTime: 0.7
   DateTime::Format::ISO8601: 0.07
+  File::Share: 0.02
+  File::ShareDir: 1.00
   HTTP::Request: 6
   HTTP::Response: 6.01
   LWP::UserAgent: 6.03
@@ -47,7 +60,7 @@ requires:
   Moose: 2.0401
   URI::Escape: 3.31
   XML::LibXML: 1.89
-  perl: 5.006
+  perl: 5.01
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.02
+version: 0.03

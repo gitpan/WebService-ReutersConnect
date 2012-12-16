@@ -42,7 +42,7 @@ has 'preview_url' => ( is => 'ro', isa => 'Maybe[Str]' , lazy_build => 1 );
 
 =head1 NAME
 
-WebService::ReutersConnect::Item - A Reuters SNI (Simple News Item) as given by the 'items', 'search' ReutersConnect methods.
+WebService::ReutersConnect::Item - A ReutersConnect SNI (Simple News Item).
 
 =head1 PROPERTIES
 

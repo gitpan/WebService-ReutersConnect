@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Test::More ;
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($ERROR);
 
 ## Mockable UserAgent
 BEGIN{
@@ -30,9 +30,9 @@ ok( $reuters->authToken() , "Ok we have an authToken");
 $reuters->authToken('someSillyToken');
 
 my @items = $reuters->search();
-foreach my $item ( @items ){
-  diag("Got item ".$item->headline());
-}
+#foreach my $item ( @items ){
+  #diag("Got item ".$item->headline());
+#}
 
 cmp_ok( $FRESH_TOKEN , 'eq' , $reuters->authToken() , "Ok the callback has worked");
 

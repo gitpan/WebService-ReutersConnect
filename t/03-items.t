@@ -4,7 +4,7 @@ use warnings;
 use Test::More ;
 use Log::Log4perl qw/:easy/;
 use DateTime;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($ERROR);
 
 ## Mockable UserAgent
 BEGIN{
@@ -25,7 +25,7 @@ ok( my $reuters = WebService::ReutersConnect->new( { username => $ENV{REUTERS_US
 ## Get channels and fetch all items from the first one.
 my @channels = $reuters->fetch_channels({ channel => [ 'xHO143',  'STK567' ] });
 
-diag("Querying items from channel ".$channels[1]->alias().":".$channels[1]->description());
+## diag("Querying items from channel ".$channels[1]->alias().":".$channels[1]->description());
 
 ok( my @items = $reuters->fetch_items($channels[1]->alias()), "Ok can fetch new items from channel");
 foreach my $item ( @items ){
@@ -40,7 +40,7 @@ foreach my $item ( @items ){
 {
   ## Test with a date_from
   my $channel = $channels[0];
-  diag("Fetching items from channel ".$channel->alias().':'.$channel->description());
+  ## diag("Fetching items from channel ".$channel->alias().':'.$channel->description());
   ## my $now = DateTime->now();
   ## We use LWP::UserAgent::Mock. Responses are frozen in time
   my $now = DateTime->new( year => 2012,
@@ -58,7 +58,7 @@ foreach my $item ( @items ){
 
   ok( @items = $reuters->fetch_items($channel, { date_from => $three_days_ago, date_to => $yesterday }),
       "Ok can get items from 2 days to now to yesterday");
-  diag("Got ".scalar(@items)." items back");
+  ## diag("Got ".scalar(@items)." items back");
   cmp_ok( $items[-1]->date_created()->ymd() , 'le' , $yesterday->ymd(), "Ok date of the earliest item is earlier than yesterday");
   cmp_ok( $items[0]->date_created()->ymd() , 'ge' , $two_days_ago->ymd(), "Ok latest item date is two days ago, because yesterday is not inclusive");
 

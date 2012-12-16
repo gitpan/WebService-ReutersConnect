@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Test::More ;
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($ERROR);
 
 ## Mockable UserAgent
 BEGIN{
@@ -24,7 +24,7 @@ ok( my @channels = $reuters->fetch_channels() );
 my $ncat = 0;
 my @channel_aliases = ();
 foreach my $channel ( @channels ){
-  diag("Channel ".$channel->alias().":".$channel->description());
+  ## diag("Channel ".$channel->alias().":".$channel->description());
   ok( $channel->alias() , "Ok channel has an alias");
   ok( $channel->description() , "Ok channel has a description");
   if( $channel->last_update() ){

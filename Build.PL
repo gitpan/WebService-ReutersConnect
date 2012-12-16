@@ -1,4 +1,4 @@
-use 5.006;
+use 5.010;
 use strict;
 use warnings;
 use Module::Build;
@@ -13,11 +13,14 @@ my $builder = Module::Build->new(
         'Test::Fatal' => 0.008,
         'LWP::UserAgent::Mockable' => 1.10,
     },
+    share_dir => 'share',
     requires => {
-        'perl' => 5.006,
-
+        'perl' => 5.010,
+        'DBD::SQLite' => 1.35,
+        'DBIx::Class' => 0.08196,
         'DateTime' => 0.70,
         'DateTime::Format::ISO8601' => 0.07,
+        'File::Share' => 0.02,
         'HTTP::Request' => 6.00,
         'HTTP::Response' => 6.01,
         'Log::Log4perl' => 1.29,

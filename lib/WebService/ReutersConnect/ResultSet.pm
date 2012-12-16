@@ -15,7 +15,7 @@ __PACKAGE__->meta->make_immutable();
 __END__
 =head1 NAME
 
-WebService::ReutersConnect::ResultSet - A Result Set of Items. Typically returned by the WebService::ReutersConnect::search method, or as part of supplemental_links on an Item
+WebService::ReutersConnect::ResultSet - A Result Set of Items.
 
 =head1 ATTRIBUTES
 

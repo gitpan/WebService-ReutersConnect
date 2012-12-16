@@ -4,6 +4,9 @@ lib/WebService/ReutersConnect.pm
 lib/WebService/ReutersConnect/APIResponse.pm
 lib/WebService/ReutersConnect/Category.pm
 lib/WebService/ReutersConnect/Channel.pm
+lib/WebService/ReutersConnect/DB.pm
+lib/WebService/ReutersConnect/DB/Result/Concept.pm
+lib/WebService/ReutersConnect/DB/Result/ConceptAlias.pm
 lib/WebService/ReutersConnect/Item.pm
 lib/WebService/ReutersConnect/ResultSet.pm
 lib/WebService/ReutersConnect/XMLDocument.pm
@@ -12,6 +15,7 @@ MANIFEST			This list of files
 META.json
 META.yml
 README
+share/concepts.db
 t/00-load.t
 t/01-login.t
 t/01-login.t.lwp-mock.out
@@ -25,7 +29,15 @@ t/05-search.t
 t/05-search.t.lwp-mock.out
 t/06-expire.t
 t/06-expire.t.lwp-mock.out
+t/07-xdoc.t
+t/07-xdoc.t.lwp-mock.out
+t/08-db.t
 t/boilerplate.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+utils/concept.sql
+utils/dbicdump.sh
+utils/knowledgeitem_rcs-editorial_0_all_2012-11-13.xml
+utils/populate_concepts.pl
+utils/README

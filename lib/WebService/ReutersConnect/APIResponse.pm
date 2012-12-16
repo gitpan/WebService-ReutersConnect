@@ -61,7 +61,7 @@ sub _build_reuters_errors{
 
 =head1 NAME
 
-WebService::ReutersConnect::APIResponse - Decorated HTTP::Response representing a ReutersConnect API Response (with extra methods).
+WebService::ReutersConnect::APIResponse - A ReutersConnect API Response (decorates L<HTTP::Response>).
 
 =cut
 

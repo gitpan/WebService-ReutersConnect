@@ -3,7 +3,7 @@ use Moose;
 extends qw/Exporter/;
 
 use constant REUTERS_DEMOUSER => 'demo.user';
-use constant REUTERS_DEMOPASSWORD => '1YYljlFf';
+use constant REUTERS_DEMOPASSWORD => 'vYkLo4Lv';
 our @EXPORT_OK = qw/REUTERS_DEMOPASSWORD REUTERS_DEMOUSER/;
 our %EXPORT_TAGS = ( demo => [ qw/REUTERS_DEMOUSER REUTERS_DEMOPASSWORD/ ] );
 
@@ -14,17 +14,25 @@ use WebService::ReutersConnect::Item;
 use WebService::ReutersConnect::XMLDocument;
 use WebService::ReutersConnect::ResultSet;
 
+use WebService::ReutersConnect::DB;
+
+use File::Share;
+
 use LWP::UserAgent;
 use HTTP::Request;
 use URI::Escape;
-use Log::Log4perl;
+use Log::Log4perl qw/:easy/;
 
 use DateTime;
 use DateTime::Format::ISO8601;
 
+unless( Log::Log4perl->initialized() ){
+  Log::Log4perl->easy_init($WARN);
+}
+
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 ## Reuters stuff
 has 'login_entry_point' => ( is => 'ro' , isa => 'Str' , default => 'https://commerce.reuters.com/rmd/rest/xml/', required => 1 );
@@ -43,6 +51,27 @@ has 'after_refresh_token' => ( is => 'ro', isa => 'CodeRef', default => sub{ sub
 
 ## Querying stuff
 has 'default_limit' => ( is => 'rw' , isa => 'Int' , default => 10 , required => 1 );
+
+## Internal DB stuff
+has 'db_file' => ( is => 'ro' , isa => 'Str' , lazy_build => 1 , required => 1 );
+has 'schema' => ( is => 'ro', isa => 'DBIx::Class::Schema' , lazy_build => 1 , required => 1);
+
+sub _build_db_file{
+  my ($self) = @_;
+  my $concepts_file = File::Share::dist_file('WebService-ReutersConnect' , 'concepts.db');
+  return $concepts_file;
+}
+
+sub _build_schema{
+  my ($self) = @_;
+  my $concepts_file = $self->db_file();
+  $LOGGER->warn("Will use SQLite DB $concepts_file");
+  my $schema = WebService::ReutersConnect::DB->connect('dbi:SQLite:'.$concepts_file , "", "" , { AutoCommit => 1,
+                                                                                                 sqlite_unicode => 1,
+                                                                                               });
+  $schema->storage->dbh()->do("PRAGMA foreign_keys = ON");
+  return $schema;
+}
 
 sub _build_user_agent{
   my ($self) = @_;
@@ -304,6 +333,19 @@ sub item{
   goto &fetch_item_xdoc;
 }
 
+## Find the concept by ID
+sub _find_concept{
+  my ($self , $id ) = @_;
+  if( my $direct = $self->schema->resultset('Concept')->find($id) ){
+    return $direct;
+  }
+
+  if( my $aliased = $self->schema->resultset('ConceptAlias')->find( { alias_id => $id } ) ){
+    return $aliased->concept();
+  }
+  return undef;
+}
+
 sub _expand_channel{
   my ($self, $channel_alias) = @_;
   if( ref($channel_alias) ){ return $channel_alias; }
@@ -449,58 +491,35 @@ WebService::ReutersConnect - Use the ReutersConnect API
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =head1 SYNOPSIS
 
 This module allows access to Reuters Connect APIs as described here:
 
-http://reutersconnect.com/
+L<http://reutersconnect.com/>
+
+It is based on the REST APIs.
+
 
 
 You WILL have to contact reuters to get yourself some API credentials if
 you want to use this module. This is out of scope of this distribution.
 However, some demo credentials are supplied by this module for your convenience.
 
-It is based on the REST APIs.
+By the way, those demo credential change from time to time, so have a look at
+L<http://reutersconnect.com/docs/Demo_Login_Page> if you get authentication errors.
 
 Example:
 
-   use WebService::ReutersConnect qw/:demo/
+   use WebService::ReutersConnect qw/:demo/;
 
    my $reuters = WebService::ReutersConnect->new({ username => REUTERS_DEMOUSER,
                                                    password => REUTERS_DEMOPASSWORD });
 
    my @channels = $reuters->channels();
-   my @items    = $reuters->items({ channel => $channel[0] });
+   my @items    = $reuters->items( $channels[0] );
    my $full_xml_doc = $reuters->fetch_item_xdoc({ item => $items[0] });
-
-=head1 AUTHENTICATION
-
-If you supply a ReutersConnect username and password, this module will fetch
-an authentication token from the service and use it in all subsequent requests.
-
-The basic usage involves giving some classical username and password as demonstrated
-in the synopsys section.
-
-You can access the authentication token: $this->authToken() for diagnostic and external storage.
-
-You can also build an instance of this module using an authentication token that you
-stored somewhere:
-
-  my $reuters = WebService::ReutersConnect->new( { authToken => $authToken } );
-
-Beware that ReutersConnect authentication tokens are only valid for 24 hours.
-It is advised to effectively renew the authentication token more often to avoid
-any expiration issue. For instance every 12 hours.
-
-This module does NOT contain any mecanism to renew authentication tokens at regular
-intervals. If you keep long standing instances of this module, it's your responsability
-to renew them regularly enough.
-
-However, for very simple cases, where there's no concurrent access to the token storage,
-or when you have only one longstanding instance, the options refresh_token and
-after_refresh_token can be useful.
 
 =head1 EXAMPLES
 
@@ -530,9 +549,54 @@ Here are some example of usage to get you started quickly:
 
   my $xdoc = $reuters->item({  guid => $item->guid() , channel => $item->channel_alias() });
   say $xdoc->asString(); ## That will help you :)
+
   my ($body_node) = $xc->findnodes('//x:html/x:body'); ## Find the HTML content (in case of article).
   say $body_node->toString(1); ## Print the whole html.
 
+  ## You can also print only the content of the body:
+  my @body_parts = $xdoc->get_html_body();
+  map { say $_->toString(1) } @body_parts;
+
+  ## Find the subjects:
+  my @subjects = $xdoc->get_subjects();
+  foreach my $subject ( @subjects ){
+    say "This is about: ".$subject->name_main();
+  }
+
+=head1 AUTHENTICATION
+
+If you supply a ReutersConnect username and password, this module will fetch
+an authentication token from the service and use it in all subsequent requests.
+
+The basic usage involves giving some classical username and password as demonstrated
+in the synopsys section.
+
+You can access the authentication token: $this->authToken() for diagnostic and external storage.
+
+You can also build an instance of this module using an authentication token that you
+stored somewhere:
+
+  my $reuters = WebService::ReutersConnect->new( { authToken => $authToken } );
+
+Beware that ReutersConnect authentication tokens are only valid for 24 hours.
+It is advised to effectively renew the authentication token more often to avoid
+any expiration issue. For instance every 12 hours.
+
+This module does NOT contain any mecanism to renew authentication tokens at regular
+intervals. If you keep long standing instances of this module, it's your responsability
+to renew them regularly enough.
+
+However, for very simple cases, where there's no concurrent access to the token storage,
+or when you have only one longstanding instance, the options refresh_token and
+after_refresh_token can be useful.
+
+=head1 LOGGING & DEBUGGING
+
+This module uses L<Log::Log4perl> and is automatically initialized to the ERROR level.
+Feel free to initialize L<Log::Log4perl> to your taste in your application.
+
+Additionally, there's is the debug option that will output very verbose
+(HTTP traffic) at the INFO level.
 
 =head1 ATTRIBUTES
 
@@ -731,7 +795,7 @@ Usage:
 
 =head2 fetch_item_xdoc
 
-Fetches one WebService::ReutersConnect::XMLDocument from Reuters, given the Item or the item ID.
+Fetches one L<WebService::ReutersConnect::XMLDocument> from Reuters, given the Item or the item ID.
 
 This document is a NewsMLG2 document as specified here: http://reutersconnect.com/files/NewsML-G2_Quick_Reference_Guide.pdf
 
@@ -761,7 +825,7 @@ Options:
 
   company_markup: 0 or 1 (default 0). If set, will markup the content with company name. See Reuters documentation.
 
-Usage::
+Usage:
 
   my $xml_doc = $this->fetch_item_xdoc({  guid => $item->guid() , channel => $item->channel()->alias() });
   my $xml_doc = $this->fetch_item_xdoc({ item_id => $item->id() });
