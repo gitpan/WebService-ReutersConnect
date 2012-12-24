@@ -1,6 +1,11 @@
 Revision history for WebService-ReutersConnect
 
-0.03   
+0.04    24 Dec 2012
+        - Added client instance creation datetime.
+        - Added broader concept links.
+        - Made compatible with stock squeeze version of DBIx::Class (0.08123)
+
+0.03    16 Dec 2012 
         - Requiring minimal perl 5.10.
         - Added built-in Reuters data about Concepts (aka subjects).
         - Added Convenience Methods To the WebService::ReutersConnect::XMLDocument

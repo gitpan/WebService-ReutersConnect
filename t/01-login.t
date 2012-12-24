@@ -16,7 +16,7 @@ use WebService::ReutersConnect qw/:demo/;
 
 ok( my $reuters = WebService::ReutersConnect->new( { username => 'john', password => 'doe' }), "Ok build a reuter");
 
-
+ok( $reuters->date_created()->isa('DateTime') , "Good date created type");
 ok( ! $reuters->authToken() , "Ok cannot get an auth token from these credentials");
 ## try connecting with real credentials.
 ok( $reuters = WebService::ReutersConnect->new({ username => $ENV{REUTERS_USERNAME} // REUTERS_DEMOUSER,

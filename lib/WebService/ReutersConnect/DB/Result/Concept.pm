@@ -131,4 +131,29 @@ __PACKAGE__->has_many(
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+
+=head2 broader_chain
+
+Returns the chain of broader concepts ( including this one ). Therefore it's never empty.
+The most general is first, the most specific is last ( this one )
+
+Usage:
+
+  my @concepts = $this->broader_chain();
+  print join(' > ', map{ $_->name_main() } @concepts );
+
+=cut
+
+sub broader_chain{
+  my ($self) = @_;
+
+  my $current = $self;
+  my @ret = ( $current );
+  while( my $broader = $current->broader() ){
+    push @ret , $broader;
+    $current = $broader;
+  }
+  return reverse @ret;
+}
+
 1;

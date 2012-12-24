@@ -34,6 +34,10 @@ foreach my $alias ( $concept->concept_aliases()->all() ){
   ok( my $aliased =  $reuters->_find_concept($alias->alias_id()), "Ok can find the same concept by alias");
   cmp_ok( $aliased->id() , 'eq' , $concept->id() , "Ok same id as original concept");
 }
+ok( $concept->broader() , "Ok got a broader concept");
+
+ok( my @chain = $concept->broader_chain(), "Ok got broader chain");
+diag(  join(' > ', map{ $_->name_main() } @chain ) );
 
 ok( !$reuters->_find_concept(314159) , "No PI concept found");
 

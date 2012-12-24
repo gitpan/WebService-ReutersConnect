@@ -40,7 +40,7 @@ __PACKAGE__->add_columns(
   "concept_id",
   { data_type => "varchar", is_foreign_key => 1, is_nullable => 0, size => 255 },
 );
-__PACKAGE__->add_unique_constraint("alias_id_unique", ["alias_id"]);
+__PACKAGE__->set_primary_key("alias_id");
 
 =head1 RELATIONS
 
@@ -60,8 +60,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-12-16 15:00:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zXcpaVtI1vX9vn3oSrZl9Q
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-12-19 14:31:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Ln/Pwp7rqLmpJ0oiZiM/rA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -7,7 +7,7 @@ WriteMakefile
   'VERSION_FROM' => 'lib/WebService/ReutersConnect.pm',
   'PREREQ_PM' => {
                    'DBD::SQLite' => '1.35',
-                   'DBIx::Class' => '0.08196',
+                   'DBIx::Class' => '0.08121',
                    'DateTime' => '0.7',
                    'DateTime::Format::ISO8601' => '0.07',
                    'File::Share' => '0.02',

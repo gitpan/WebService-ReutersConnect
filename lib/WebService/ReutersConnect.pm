@@ -32,7 +32,7 @@ unless( Log::Log4perl->initialized() ){
 
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 ## Reuters stuff
 has 'login_entry_point' => ( is => 'ro' , isa => 'Str' , default => 'https://commerce.reuters.com/rmd/rest/xml/', required => 1 );
@@ -48,6 +48,8 @@ has 'user_agent' => ( is => 'rw' , isa => 'LWP::UserAgent', lazy_build => 1);
 has 'debug' => ( is => 'rw' , isa => 'Bool' , default => 0, required => 1);
 has 'refresh_token' => ( is => 'ro', isa => 'Bool', default => 0 , required => 1);
 has 'after_refresh_token' => ( is => 'ro', isa => 'CodeRef', default => sub{ sub{}; }, required => 1);
+
+has 'date_created' => ( is => 'ro' , isa => 'DateTime' , default => sub{ return DateTime->now();} , required => 1);
 
 ## Querying stuff
 has 'default_limit' => ( is => 'rw' , isa => 'Int' , default => 10 , required => 1 );
@@ -654,6 +656,10 @@ A L<LWP::UserAgent>. There's a default instance but feel free to replace it with
 =head2 debug
 
 Swicthes on/off extra debugging (Specially HTTP Requests and Responses).
+
+=head2 date_created
+
+L<DateTime> At which this instance was created.
 
 =head1 METHODS
 
