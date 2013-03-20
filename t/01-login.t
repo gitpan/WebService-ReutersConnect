@@ -5,12 +5,14 @@ use Test::More ;
 use Log::Log4perl qw/:easy/;
 Log::Log4perl->easy_init($ERROR);
 
+
 ## Mockable UserAgent
 BEGIN{
   $ENV{LWP_UA_MOCK} ||= 'playback';
   $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
+  eval{ require  LWP::UserAgent::Mockable; LWP::UserAgent::Mockable->import(); };
+  plan skip_all => 'Cannot load LWP::UserAgent::Mockable. Skipping' if $@;
 }
-use LWP::UserAgent::Mockable;
 
 use WebService::ReutersConnect qw/:demo/;
 

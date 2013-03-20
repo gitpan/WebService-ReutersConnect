@@ -6,12 +6,14 @@ use Test::Fatal qw/lives_ok/;
 use Log::Log4perl qw/:easy/;
 Log::Log4perl->easy_init($WARN);
 
-## Mockable UserAgent
-# BEGIN{
-#   $ENV{LWP_UA_MOCK} ||= 'playback';
-#   $ENV{LWP_UA_MOCK_FILE} = __FILE__.'.lwp-mock.out';
-# }
-# use LWP::UserAgent::Mockable;
+## This test depends on File::Share (not just File::ShareDir) to be there.
+BEGIN{
+  eval{ require File::Share; };
+  if( $@ ){
+    plan skip_all => 'Cannot load File::Share. Skipping' if $@;
+  }
+}
+
 
 use WebService::ReutersConnect qw/:demo/;
 
@@ -41,5 +43,4 @@ diag(  join(' > ', map{ $_->name_main() } @chain ) );
 
 ok( !$reuters->_find_concept(314159) , "No PI concept found");
 
-## LWP::UserAgent::Mockable->finished;
 done_testing();

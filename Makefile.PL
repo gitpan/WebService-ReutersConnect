@@ -10,21 +10,24 @@ WriteMakefile
                    'DBIx::Class' => '0.08121',
                    'DateTime' => '0.7',
                    'DateTime::Format::ISO8601' => '0.07',
-                   'File::Share' => '0.02',
+                   'Devel::REPL' => '1.003012',
                    'File::ShareDir' => '1.00',
+                   'Getopt::Long' => '2.38',
                    'HTTP::Request' => '6',
                    'HTTP::Response' => '6.01',
                    'LWP::UserAgent' => '6.03',
-                   'LWP::UserAgent::Mockable' => '1.1',
                    'Log::Log4perl' => '1.29',
                    'Moose' => '2.0401',
+                   'Term::ReadKey' => '2.3',
                    'Test::Fatal' => '0.008',
                    'Test::More' => 0,
                    'URI::Escape' => '3.31',
                    'XML::LibXML' => '1.89'
                  },
   'INSTALLDIRS' => 'site',
-  'EXE_FILES' => [],
+  'EXE_FILES' => [
+                   'bin/reutersconnect'
+                 ],
   'PL_FILES' => {}
 )
 ;

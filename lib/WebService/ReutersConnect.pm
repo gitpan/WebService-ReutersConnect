@@ -16,7 +16,15 @@ use WebService::ReutersConnect::ResultSet;
 
 use WebService::ReutersConnect::DB;
 
-use File::Share;
+
+
+BEGIN{
+  eval{ require File::Share; File::Share->import('dist_file'); };
+  if( $@ ){
+    require File::ShareDir;
+    File::ShareDir->import('dist_file');
+  }
+};
 
 use LWP::UserAgent;
 use HTTP::Request;
@@ -32,13 +40,13 @@ unless( Log::Log4perl->initialized() ){
 
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 ## Reuters stuff
 has 'login_entry_point' => ( is => 'ro' , isa => 'Str' , default => 'https://commerce.reuters.com/rmd/rest/xml/', required => 1 );
 has 'entry_point' => ( is => 'ro' , isa => 'Str' , default => 'http://rmb.reuters.com/rmd/rest/xml/', required => 1 );
-has 'username' => ( is => 'ro', isa => 'Str' );
-has 'password' => ( is => 'ro', isa => 'Str' );
+has 'username' => ( is => 'rw', isa => 'Str' );
+has 'password' => ( is => 'rw', isa => 'Str' );
 has 'authToken' => ( is => 'rw', isa => 'Maybe[Str]' , lazy_build => 1);
 
 has 'categories_idx' => ( is => 'ro', isa => 'HashRef[WebService::ReutersConnect::Category]' , default => sub{ {}; }, required => 1);
@@ -60,7 +68,8 @@ has 'schema' => ( is => 'ro', isa => 'DBIx::Class::Schema' , lazy_build => 1 , r
 
 sub _build_db_file{
   my ($self) = @_;
-  my $concepts_file = File::Share::dist_file('WebService-ReutersConnect' , 'concepts.db');
+  my $concepts_file = dist_file('WebService-ReutersConnect' , 'concepts.db');
+  ## my $concepts_file = dist_file('WebService-ReutersConnect' , 'concepts.db');
   return $concepts_file;
 }
 
@@ -84,7 +93,11 @@ sub _build_authToken{
   my ($self) = @_;
 
   unless( $self->username() && $self->password() ){
-    confess("No username AND password. Cannot request authentication token");
+    ## Try to scrape some from demo login page.
+    $LOGGER->info("No username/password given. Trying to scrape the demo ones");
+    unless( $self->scrape_demo_credentials() ){
+      confess("No username AND password could be found. Cannot request authentication token");
+    }
   }
 
   my $response = $self->_query('login', { username => $self->username(),
@@ -102,6 +115,34 @@ sub _build_authToken{
   $LOGGER->error("Failed to get authentication token. Reuters STATUS CODE ".$response->reuters_status());
   $LOGGER->info($response->reuters_errors_string());
   return;
+}
+
+sub scrape_demo_credentials{
+  my ($self) = @_;
+  my $agent = $self->user_agent();
+
+  my $demo_page = 'http://reutersconnect.com/docs/Demo_Login_Page';
+  my $req = HTTP::Request->new( GET =>  $demo_page );
+  my $resp = $agent->request($req);
+
+  unless( $resp->is_success ){
+    $LOGGER->error("Cannot scape $demo_page:".$resp->status_line());
+    return 0;
+  }
+
+  my $content = $resp->content();
+  my ($username, $password) = ( $content =~ m|<strong>Username: (\S+?)<br /><span> </span>Password: &nbsp;(\S+?)</strong>| );
+
+  unless( $username && $password ){
+    $LOGGER->error("Cannot find Username and password in content");
+    return 0;
+  }
+
+  $LOGGER->info("Found '$username/$password' credentials");
+
+  $self->username($username);
+  $self->password($password);
+  return 1;
 }
 
 
@@ -489,11 +530,29 @@ __END__
 
 =head1 NAME
 
-WebService::ReutersConnect - Use the ReutersConnect API
+WebService::ReutersConnect - Use the ReutersConnect Live News API
 
 =head1 VERSION
 
-Version 0.03
+Version 0.05
+
+=head1 INSTALLATION
+
+=head2 Debian based
+
+This module depends only on debian distributed packages. If you're using a debian based system, do
+
+ $ sudo apt-get install perl-modules libtest-fatal-perl perl-base libdbd-sqlite3-perl libdbix-class-perl libdatetime-perl \
+ libdatetime-format-iso8601-perl libdevel-repl-perl libfile-sharedir-perl libwww-perl liblog-log4perl-perl libmoose-perl \
+ libterm-readkey-perl liburi-perl libxml-libxml-perl
+
+ $ sudo cpan -i WebService::ReutersConnect ## or anything you like.
+
+=head2 Other OSs
+
+Use your favorite Perl package installation method.
+
+ $ sudo cpan -i WebService::ReutersConnect ## Should do the job on *NIX systems
 
 =head1 SYNOPSIS
 
@@ -503,14 +562,43 @@ L<http://reutersconnect.com/>
 
 It is based on the REST APIs.
 
-
-
 You WILL have to contact reuters to get yourself some API credentials if
 you want to use this module. This is out of scope of this distribution.
 However, some demo credentials are supplied by this module for your convenience.
 
 By the way, those demo credential change from time to time, so have a look at
 L<http://reutersconnect.com/docs/Demo_Login_Page> if you get authentication errors.
+
+For your convenience, this module will try scraping the demo credentials from this page
+if you don't feel like looking at it yourself :)
+
+=head2 Shell
+
+This module provides a 'reutersconnect' shell so you can interactively play with
+the API.
+
+Example:
+
+ $ reutersconnect
+ 2013/03/20 16:45:05 Will try to use the demo account. Use '/usr/local/bin/reutersconnect -u <username>' to login as a specific user
+ 2013/03/20 16:45:05 No username/password given. Trying to scrape the demo ones
+ 2013/03/20 16:45:07 Found 'demo.user/vYkLo4Lv' credentials
+ 2013/03/20 16:45:08 Granted access to 6 channels
+ 2013/03/20 16:45:08 Starting shell. ReutersConnect object is '$rc'
+                                                                                                                                                                            demo.user@reutersconnect.com> map{ $_->alias().' '.$_->description()."\n" } $rc->channels()
+ FES376 US Online Report Top News
+ QTZ240 NVO
+ STK567 Reuters World Service
+ mkc191 Unique-Product-For-User-26440
+ txb889 Unique-Product-For-Account-26439
+ xHO143 Italy Picture Service
+
+ demo.user@reutersconnect.com> [CTRL-D] to quit
+
+See the rest of this module doc and L<WebService::ReutersConnect::Channel> and L<WebService::ReutersConnect::Item>
+for a detailed API description.
+
+=head2 Perl
 
 Example:
 
@@ -522,6 +610,13 @@ Example:
    my @channels = $reuters->channels();
    my @items    = $reuters->items( $channels[0] );
    my $full_xml_doc = $reuters->fetch_item_xdoc({ item => $items[0] });
+
+Additionally, a very basic demo page scraping mechanism is provided, so you
+can build an API object without any credential at all if you feel lucky:
+
+   my $reuters = WebService::ReutersConnect->new();
+   my @channels = $reuters->channels();
+
 
 =head1 EXAMPLES
 
@@ -591,6 +686,15 @@ to renew them regularly enough.
 However, for very simple cases, where there's no concurrent access to the token storage,
 or when you have only one longstanding instance, the options refresh_token and
 after_refresh_token can be useful.
+
+
+=head2 DEMO AUTHENTICATION
+
+Reuters provides a demo account so you can try out this API without holding an account
+with them. The demo credentials live on this page http://reutersconnect.com/docs/Demo_Login_Page
+
+They do change every month, but this module provides a very basic method to scrape them if no
+username/password is given in the constructor. See SYNOPSIS section.
 
 =head1 LOGGING & DEBUGGING
 
@@ -662,6 +766,18 @@ Swicthes on/off extra debugging (Specially HTTP Requests and Responses).
 L<DateTime> At which this instance was created.
 
 =head1 METHODS
+
+=head2 scrape_demo_credentials
+
+Quick and very dirty method to scrape demo credentials from http://reutersconnect.com/docs/Demo_Login_Page
+This is used automatically when no credential at all are provided in the constructor. You shouldn't have
+to use that yourself. Returns 1 for success, 0 for failure.
+
+Usage:
+
+  unless( $this->scrape_demo_credentials() ){
+     ## Woopsy
+  }
 
 =head2 channels
 
