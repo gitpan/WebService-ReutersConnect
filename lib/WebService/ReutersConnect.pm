@@ -40,7 +40,7 @@ unless( Log::Log4perl->initialized() ){
 
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 ## Reuters stuff
 has 'login_entry_point' => ( is => 'ro' , isa => 'Str' , default => 'https://commerce.reuters.com/rmd/rest/xml/', required => 1 );

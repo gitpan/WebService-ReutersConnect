@@ -49,7 +49,7 @@
    "provides" : {
       "WebService::ReutersConnect" : {
          "file" : "lib/WebService/ReutersConnect.pm",
-         "version" : "0.05"
+         "version" : "0.06"
       },
       "WebService::ReutersConnect::APIResponse" : {
          "file" : "lib/WebService/ReutersConnect/APIResponse.pm",
@@ -94,5 +94,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.05"
+   "version" : "0.06"
 }
